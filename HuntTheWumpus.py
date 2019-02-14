@@ -2,7 +2,7 @@
 #Wumpus World driver
 #COSC370, Project 1
 #Alan C. Jamieson
-#Latest Revision: February 1, 2019
+#Latest Revision: February 11, 2019
 
 #This driver will ask the user for some information in regards to the format of the Hunt the Wumpus game (credit: Gregory Yob).
 #This information will then be passed to the WumpusAgent module (user provided), then randomly assign wumpi, pits, and gold.
@@ -11,7 +11,8 @@
 #Note: there are very few self-error checks as part of this program.
 from random import randint
 import WumpusAgent
-import WumpGUI
+#import WumpGUI
+
 #--------------------------
 #globals
 #--------------------------
@@ -169,17 +170,25 @@ def deathCheck(x, y, l):
 
 #moveWumpi - moves the wumpi, stored as a list of lists
 def moveWumpi(w, l):
-    #Wumpus will not move onto the gold or onto a pit, but could be multiple wumpi in a space
+    #Wumpus will not move onto the gold, entrance, or onto a pit, but could be multiple wumpi in a space
     for wumpus in w:
         direction = randint(1,4)
-        if direction == 1 and wumpus[0] != 0 and l[wumpus[0]-1][wumpus[1]] != 'g' and l[wumpus[0]-1][wumpus[1]] != 'p':
+        if direction == 1 and wumpus[0] != 0 and l[wumpus[0]-1][wumpus[1]] != 'g' and l[wumpus[0]-1][wumpus[1]] != 'p' and l[wumpus[0]-1][wumpus[1]] != 'e':
+            l[wumpus[0]][wumpus[1]] = 0
             wumpus[0] = wumpus[0] - 1
-        if direction == 2 and wumpus[0] != len(l)-1 and l[wumpus[0]+1][wumpus[1]] != 'g' and l[wumpus[0]+1][wumpus[1]] != 'p':
+            l[wumpus[0]][wumpus[1]] = 'w'
+        if direction == 2 and wumpus[0] != len(l)-1 and l[wumpus[0]+1][wumpus[1]] != 'g' and l[wumpus[0]+1][wumpus[1]] != 'p' and l[wumpus[0]+1][wumpus[1]] != 'e':
+            l[wumpus[0]][wumpus[1]] = 0
             wumpus[0] = wumpus[0] + 1
-        if direction == 3 and wumpus[1] != 0 and l[wumpus[0]][wumpus[1]-1] != 'g' and l[wumpus[0]][wumpus[1]-1] != 'p':
+            l[wumpus[0]][wumpus[1]] = 'w'
+        if direction == 3 and wumpus[1] != 0 and l[wumpus[0]][wumpus[1]-1] != 'g' and l[wumpus[0]][wumpus[1]-1] != 'p' and l[wumpus[0]][wumpus[1]-1] != 'e':
+            l[wumpus[0]][wumpus[1]] = 0
             wumpus[1] = wumpus[1] - 1
-        if direction == 4 and wumpus[1] !=len(l)-1 and l[wumpus[0]][wumpus[1]+1] != 'g' and l[wumpus[0]][wumpus[1]+1] != 'p':
+            l[wumpus[0]][wumpus[1]] = 'w'
+        if direction == 4 and wumpus[1] !=len(l)-1 and l[wumpus[0]][wumpus[1]+1] != 'g' and l[wumpus[0]][wumpus[1]+1] != 'p' and l[wumpus[0]][wumpus[1]+1] != 'e':
+            l[wumpus[0]][wumpus[1]] = 0
             wumpus[1] = wumpus[1] + 1
+            l[wumpus[0]][wumpus[1]] = 'w'
 
 #winCheck - check to see if player is back on entrance tile, with the gold
 def winCheck(x, y, l):
@@ -195,10 +204,10 @@ def winCheck(x, y, l):
 #NOTE: games will run for a maximum of 20000 agent moves
 #SECOND NOTE: no user input checks are done - because Alan is lazy
 
-gametype = 2#int(input("Enter the type of wumpi (1 for non-moving, 2 for moving): "))
-numwumpi = 0#int(input("Enter the number of wumpi: "))
-numarrows = 5#int(input("Enter the number of arrows: "))
-numgames = 1#int(input("Enter the number of games: "))
+gametype = 1#int(input("Enter the type of wumpi (1 for non-moving, 2 for moving): "))
+numwumpi = 10#int(input("Enter the number of wumpi: "))
+numarrows = 10#int(input("Enter the number of arrows: "))
+numgames = 100#int(input("Enter the number of games: "))
 
 #variables for stats
 numwins = 0
@@ -216,6 +225,7 @@ for game in range(numgames):
 
     #set parameter for player - this is the reset for the WumpusAgent
     WumpusAgent.setParams(gametype, numarrows, numwumpi)
+
     #get initial percept string
     percept = ''
     if stenchCheck(playerx, playery, board):
@@ -225,15 +235,17 @@ for game in range(numgames):
     if breezeCheck(playerx, playery, board):
         percept = percept + 'B'
     #while the player is not dead, and hasn't won yet, get the next move
-    while deathCheck != True and winCheck != True and nummoves != 20000:
-        WumpGUI.makeGrid(board,playerx,playery)
+    while deathCheck != True and winCheck != True and nummoves != 4000000:
+        #WumpGUI.makeGrid(board,playerx,playery)
         nummoves = nummoves + 1
         #get move from agent
+        #print('real',playery,playerx)
         move = WumpusAgent.getMove(percept)
         #intialize percept string
         percept = ''
         #move parser
         #increment based on move, perform bump checks, move back if True
+
         if move == 'N':
             playerx = playerx - 1
             if bumpCheck(playerx, playery, board):
@@ -305,7 +317,7 @@ for game in range(numgames):
             moveWumpi(wumpilist, board)
 
         #check if we timed out
-        if nummoves == 20000:
+        if nummoves == 4000000:
             numtimeouts = numtimeouts + 1
     #quick status print
     print("Game number " + str(game) + " complete in " + str(nummoves) + " moves.")

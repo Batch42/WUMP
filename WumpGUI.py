@@ -19,16 +19,16 @@ def makeGrid(l,x,y):
     cHeight = g.winfo_height()/(len(l)+1)
     i=1
     for row in l:
-        Thread(target=threadGrid, args=[row,i,cHeight,cWidth,y==i-1,x]).start()
+        Thread(target=threadGrid, args=[row,i,cHeight,cWidth,y,x]).start()
         i+=1
 
     time.sleep(1)
 
-def threadGrid(row,i,cHeight,cWidth,isy,x):
+def threadGrid(row,i,cHeight,cWidth,y,x):
     global g
     j=1
     for v in row:
-        g.create_text(i*cWidth,j*cHeight,font=("Purisa", 8),text='X' if isy and x==j-1 else v)
+        g.create_text(i*cWidth,j*cHeight,font=("Purisa", 20),text='X' if x==i-1 and y==j-1 else v)
         j+=1
 
 
